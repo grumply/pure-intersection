@@ -95,7 +95,7 @@ mkIntersection jsv =
     tm  <- jsv .# "time"
     pure $ Intersection bcr ip ir ii rb tr tm
 #else
-  Intersection def 0 def Nothing def def 0
+  Intersection def def def def def def def
 #endif
 
 
