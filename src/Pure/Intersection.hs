@@ -35,6 +35,7 @@ data Observer = Observer_
   , rootMargin :: Txt
   , threshold  :: [Double]
   , action     :: [Intersection] -> IO ()
+  , disable    :: Bool
   } deriving (Generic)
 
 instance Default Observer where
@@ -69,11 +70,12 @@ instance Pure Observer where
       let
         handleRef (Node ref) = modifyM_ self $ \o _ -> return ((Nothing,ref),run o)
         run o = do
-          (_,ref) <- get self
-          options <- toOptions o
-          (obs,rel) <- observer (action o) options
-          observe obs ref
-          modify_ self $ \_ _ -> (Just rel,ref)
+          unless (disable o) $ do
+            (_,ref) <- get self
+            options <- toOptions o
+            (obs,rel) <- observer (action o) options
+            observe obs ref
+            modify_ self $ \_ _ -> (Just rel,ref)
       in 
         def
           { construct = return (Nothing,nullJSV)
@@ -181,6 +183,11 @@ pattern Action :: HasProp Action a => Prop Action a -> a -> a
 pattern Action p a <- (getProp Action_ &&& id -> (p,a)) where
   Action p a = P.setProp Action_ p a
 
+data Disable = Disable_
+pattern Disable :: HasProp Disable a => Prop Disable a -> a -> a
+pattern Disable p a <- (getProp Disable_ &&& id -> (p,a)) where
+  Disable p a = P.setProp Disable_ p a
+
 instance HasProp As Observer where
     type Prop As Observer = Features -> [View] -> View
     getProp _ = as
@@ -205,6 +212,11 @@ instance HasProp Action Observer where
   type Prop Action Observer = [Intersection] -> IO ()
   getProp _ = action
   setProp _ a o = o { action = a }
+
+instance HasProp Disable Observer where
+  type Prop Disable Observer = Bool
+  getProp _ = disable
+  setProp _ d o = o { disable = d }
 
 instance HasFeatures Observer where
     getFeatures = features
