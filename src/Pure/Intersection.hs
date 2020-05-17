@@ -3,7 +3,7 @@
    FlexibleContexts, ViewPatterns #-}
 module Pure.Intersection where
 
-import Pure hiding (features,children,Action)
+import Pure hiding (features,children,Action,action,root)
 
 import Pure.Data.Lifted
 import Pure.Data.Cond
