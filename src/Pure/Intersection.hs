@@ -59,7 +59,7 @@ data Intersection = Intersection
   , ratio        :: Double
   , intersection :: Rect
   , intersecting :: Bool
-  , rootBounds   :: Rect
+  , rootBounds   :: Maybe Rect
   , target       :: JSV
   , time         :: Double
   }
@@ -84,6 +84,8 @@ instance Pure Observer where
           , render  = \Observer_ {..} _ -> as (features & Lifecycle (HostRef handleRef)) children
           }
 
+-- For why rootBounds can be null, see: 
+-- https://developers.google.com/web/updates/2016/04/intersectionobserver#iframe_magic
 mkIntersection :: JSV -> Intersection
 mkIntersection jsv = 
 #ifdef __GHCJS__
@@ -92,7 +94,7 @@ mkIntersection jsv =
     ip  <- jsv .# "intersectionRatio"
     ir  <- fmap mkRect $ jsv .# "intersectionRect"
     ii  <- jsv .# "isIntersecting"
-    rb  <- fmap mkRect $ jsv .# "rootBounds"
+    let rb = fmap mkRect $ jsv .# "rootBounds"
     tr  <- jsv .# "target"
     tm  <- jsv .# "time"
     pure $ Intersection bcr ip ir ii rb tr tm
