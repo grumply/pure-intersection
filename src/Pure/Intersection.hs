@@ -81,7 +81,7 @@ instance Pure Observer where
           { construct = return (Nothing,nullJSV)
           , receive = \new (mrel,ref) -> traverse_ id mrel >> run new >> return (mrel,ref)
           , unmounted = get self >>= \(mrel,_) -> traverse_ id mrel
-          , render  = \Observer_ {..} _ -> as (features & Lifecycle (HostRef handleRef)) children
+          , render  = \Observer_ {..} (_,h) -> as (features & Host (coerce h) handleRef) children
           }
 
 -- For why rootBounds can be null, see: 
